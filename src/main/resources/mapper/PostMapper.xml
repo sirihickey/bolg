@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bdqn.mapper.PostMapper">
+
+    <resultMap id="BaseResultMap" type="com.bdqn.pojo.Post">
+            <id property="postid" column="postid" jdbcType="INTEGER"/>
+            <result property="title" column="title" jdbcType="VARCHAR"/>
+            <result property="article" column="article" jdbcType="VARCHAR"/>
+            <result property="postViews" column="post_views" jdbcType="INTEGER"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="typeid" column="typeid" jdbcType="INTEGER"/>
+            <result property="userid" column="userid" jdbcType="INTEGER"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        postid,title,article,
+        post_views,create_time,update_time,
+        typeid,userid,version,
+        is_deleted,status
+    </sql>
+
+    <!-- IPage<Map> selectMyPage(IPage<Map> page,@Param("portalVo") PortalVo portalVo); -->
+    <select id="selectMyPage" resultType="map">
+        select postid,title,article,post_views,timestampdiff(hour,create_time,now()) pasthours,typeid,p.userid,nickname
+        from post p
+        inner join user u on u.userid = p.userid
+        where p.is_deleted=0 and status='APPROVED'
+        <if test="portalVo.keyWords != null and portalVo.keyWords.length()>0">
+            and title like concat('%',#{portalVo.keyWords},"%")
+        </if>
+        <if test="portalVo.typeid != 0">
+            and typeid = #{portalVo.typeid}
+        </if>
+    </select>
+    <!-- Map queryDetailMap(Integer postid); -->
+    <select id="queryDetailMap" resultType="map">
+        select postid,title,article,post_views postViews,
+               timestampdiff(hour,create_time,now()) pastHours,nickname,
+               p.typeid,typename,p.version from post p
+               inner join user u on u.userid= p.userid
+               inner join type t on t.typeid= p.typeid
+        where postid = #{postid}
+    </select>
+
+    <!-- IPage<Map> selectAdminPage(IPage<Map> page, @Param("portalVo") PortalVo portalVo); -->
+    <select id="selectAdminPage" resultType="map">
+        select postid,title,post_views,timestampdiff(hour,create_time,now()) pasthours,typeid,userid,status
+        from post where is_deleted=0 and status='DRAFT'
+        <if test="portalVo.keyWords != null and portalVo.keyWords.length()>0">
+            and title like concat('%',#{portalVo.keyWords},"%")
+        </if>
+        <if test="portalVo.typeid != 0">
+            and typeid = #{portalVo.typeid}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bdqn.mapper.CommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.bdqn.pojo.Comment">
+            <id property="comid" column="comid" jdbcType="INTEGER"/>
+            <result property="comarticel" column="comarticel" jdbcType="VARCHAR"/>
+            <result property="postid" column="postid" jdbcType="INTEGER"/>
+            <result property="userid" column="userid" jdbcType="INTEGER"/>
+            <result property="comtime" column="comtime" jdbcType="TIMESTAMP"/>
+            <result property="fatherid" column="fatherid" jdbcType="INTEGER"/>
+            <result property="istwo" column="istwo" jdbcType="TINYINT"/>
+            <result property="twoid" column="twoid" jdbcType="INTEGER"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        comid,comarticel,postid,
+        userid,comtime,fatherid,
+        istwo,twoid,is_deleted,
+        version
+    </sql>
+
+    <!-- List<Comment> selectAllComment(Integer postid); -->
+    <select id="selectAllComment" resultType="map">
+        select comid,comarticel,postid,c.userid,comtime,fatherid,istwo,twoid,nickname,c.is_deleted,c.version
+        from comment c
+        inner join user u on u.userid=c.userid
+        where postid = #{postid} and c.is_deleted = 0
+    </select>
+
+    <!-- List<Comment> selectFatherComment(Integer postid); -->
+    <select id="selectFatherComment" resultType="map">
+        select comid,comarticel,postid,c.userid,comtime,fatherid,istwo,twoid,nickname,c.is_deleted,c.version
+        from comment c
+        inner join user u on u.userid=c.userid
+        where postid = #{postid}  and fatherid is null and istwo =0 and c.is_deleted = 0
+    </select>
+
+    <!-- List<Comment> selectTwoComment(Integer postid);     -->
+    <select id="selectTwoComment" resultType="map">
+        select comid,comarticel,postid,c.userid,comtime,fatherid,istwo,twoid,nickname,c.is_deleted,c.version
+        from comment c
+                 inner join user u on u.userid=c.userid
+        where postid = #{postid} and fatherid is not null and istwo = 1 and c.is_deleted = 0
+    </select>
+
+</mapper>
